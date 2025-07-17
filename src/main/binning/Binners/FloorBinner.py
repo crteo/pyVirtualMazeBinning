@@ -7,9 +7,9 @@ DEFAULT_SIZE = (25,25)
 DEFAULT_CENTER = (0,0,0)
 FLOOR_BIN_SIZE = Binner.GLOB_BIN_DEFAULT_SIZE # axis-specific, & height
 class FloorBinner(Binner.Binner):
-    center = np.array((np.NAN,np.NAN,np.NAN))
+    center = np.array((np.nan,np.nan,np.nan))
     size = np.array(DEFAULT_SIZE)
-    corner = np.array((np.NAN,np.NAN,np.NAN))
+    corner = np.array((np.nan,np.nan,np.nan))
     bin_cache = np.zeros((0,0,0))
     
     def __init__(self, center = DEFAULT_CENTER, size = DEFAULT_SIZE):

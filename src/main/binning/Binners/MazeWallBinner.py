@@ -6,7 +6,7 @@ from . import Binner
 DEFAULT_SIZE = (5, 3, 5)
 PILLAR_BIN_SIZE = Binner.GLOB_BIN_DEFAULT_SIZE # axis-specific, & height
 class MazeWallBinner(Binner.Binner):
-    center = np.array((np.NAN,np.NAN,np.NAN))
+    center = np.array((np.nan,np.nan,np.nan))
     size = np.array(DEFAULT_SIZE)
     bin_cache = np.zeros((0,0,0))
     

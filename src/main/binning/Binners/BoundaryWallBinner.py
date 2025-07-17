@@ -8,7 +8,7 @@ DEFAULT_SIZE = (25,5)
 DEFAULT_CENTER = (0,0,0)
 WALL_BIN_SIZE = Binner.GLOB_BIN_DEFAULT_SIZE # axis-specific, & height
 class BoundaryWallBinner(Binner.Binner):
-    # center = np.array((np.NAN,np.NAN,np.NAN))
+    # center = np.array((np.nan,np.nan,np.nan))
     # size = np.array(DEFAULT_SIZE)
     # bin_cache = np.zeros((0,0,0))
 

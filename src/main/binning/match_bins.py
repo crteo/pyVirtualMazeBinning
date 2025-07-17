@@ -26,27 +26,33 @@ def get_mappers(name_arr : np.array, point_arr : np.array) :
     out_series = pd.Series(np.zeros(name_arr.shape))
     
     def get_mapper(obj_name : str) :
+        def isin(A, B):
+            for item_a in A:
+                if item_a in B.lower():
+                    return True
+            return False
         if "NaN" in obj_name :
             return bin_consts.BINNERS.NAN_BINNER
-        if "BlueWall" in obj_name :
+        if "BlueWall" in obj_name or isin(["pig","cat","m_wall_29", "m_wall_6", "m_wall_21", "m_wall_10"], obj_name):
             return bin_consts.BINNERS.PILLAR_BLUE_BINNER
-        if "GreenWall" in obj_name :
+        if "GreenWall" in obj_name  or isin(["rabit","m_wall_26", "m_wall_25", "m_wall_1", "m_wall_5"], obj_name)   :
             return bin_consts.BINNERS.PILLAR_GREEN_BINNER
-        if "RedWall" in obj_name :
+        if "RedWall" in obj_name or isin(["donkey","crocodile","m_wall_4", "m_wall_3", "m_wall_15", "m_wall_24"], obj_name):
             return bin_consts.BINNERS.PILLAR_RED_BINNER
-        if "YellowWall" in obj_name :
+        if "YellowWall" in obj_name  or isin(["camel","m_wall_7", "m_wall_8", "m_wall_12", "m_wall_20"], obj_name):
             return bin_consts.BINNERS.PILLAR_YELLOW_BINNER
         if "Ground" in obj_name :
             return bin_consts.BINNERS.FLOOR_BINNER
-        if "Ceiling" in obj_name :
+        if "ceil" in obj_name.lower() :
             return bin_consts.BINNERS.CEILING_BINNER
-        if "WallsPerimeter" in obj_name :
+        if "WallsPerimeter" in obj_name or "wall" in obj_name.lower() :
             return bin_consts.BINNERS.BOUNDARY_BINNER
         if "CueImage" in obj_name :
             return bin_consts.BINNERS.CUE_BINNER
         if "HintImage" in obj_name :
             return bin_consts.BINNERS.HINT_BINNER
         else :
+            print(f"Undefined name {obj_name}, returning NaN Binner")
             raise Exception("Undefined name, exiting") 
     
     out_series = \
