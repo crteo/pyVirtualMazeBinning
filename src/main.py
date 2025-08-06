@@ -65,7 +65,7 @@ def get_savepath(path: str, is_multicast: bool = False) -> str:
         # If it is multicast, append "_multicast" to the base name
         return os.path.join(folder_path,"mbinData.csv")
 
-    return os.path.join(folder_path, f"1binData.csv")
+    return os.path.join(folder_path, f"1binData_new.csv")
 
     
 
@@ -108,6 +108,22 @@ def bin_path(path : str, multicast : bool, savepath : str) :
     print("Processing CSV file:")
     process(path, savepath, col_nums_enum)
 
+def process_batch(batch_file_path: str):
+    """Process multiple files listed in a text file"""
+    with open(batch_file_path, 'r') as f:
+        file_paths = [line.strip() for line in f if line.strip()]
+    
+    for file_path in file_paths:
+        if os.path.exists(file_path):
+            print(f"\n--- Processing: {file_path} ---")
+            try:
+                bin_path(path=file_path, multicast=False, savepath=None)
+                print(f"✓ Successfully processed: {file_path}")
+            except Exception as e:
+                print(f"✗ Error processing {file_path}: {str(e)}")
+        else:
+            print(f"✗ File not found: {file_path}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process CSV files.')
@@ -116,9 +132,13 @@ if __name__ == "__main__":
     parser.add_argument('--multi_path', type=str, help="Path to the multicast CSV")
     parser.add_argument('--single_save_path', type=str, help="Path to save for single binning")
     parser.add_argument('--multi_save_path', type=str, help="Path to save for multi binning")
+    parser.add_argument('--batch_file', type=str, help='Path to text file containing list of CSV paths to process')
     args = parser.parse_args()
 
-    bin_path(path=args.single_path, multicast=False, savepath=args.single_save_path)
-   #bin_path(path=args.multi_path, multicast=True, savepath=args.multi_save_path)
-
+    if args.batch_file:
+        process_batch(args.batch_file)
+    elif args.single_path:
+        bin_path(path=args.single_path, multicast=False, savepath=args.single_save_path)
+    else:
+        print("Please provide either --single_path or --batch_file")
           
