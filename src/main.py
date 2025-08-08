@@ -1,5 +1,6 @@
 from main.IO import reading
 from main.binning import bin
+import glob
 
 import csv
 from main.binning.match_bins import get_mappers,apply_binners
@@ -111,19 +112,29 @@ def bin_path(path : str, multicast : bool, savepath : str) :
 def process_batch(batch_file_path: str):
     """Process multiple files listed in a text file"""
     with open(batch_file_path, 'r') as f:
-        file_paths = [line.strip() for line in f if line.strip()]
+        directory_paths = [line.strip() for line in f if line.strip()]
     
-    for file_path in file_paths:
-        if os.path.exists(file_path):
-            print(f"\n--- Processing: {file_path} ---")
-            try:
-                bin_path(path=file_path, multicast=False, savepath=None)
-                print(f"✓ Successfully processed: {file_path}")
-            except Exception as e:
-                print(f"✗ Error processing {file_path}: {str(e)}")
+    for directory_path in directory_paths:
+        if os.path.exists(directory_path) and os.path.isdir(directory_path):
+            print(f"\n--- Searching in directory: {directory_path} ---")
+            
+            # Search for session*.csv files in the directory
+            csv_pattern = os.path.join(directory_path, "session*.csv")
+            csv_files = glob.glob(csv_pattern)
+            
+            if csv_files:
+                print(f"Found {len(csv_files)} CSV file(s) matching pattern")
+                for csv_file in csv_files:
+                    print(f"\n--- Processing: {csv_file} ---")
+                    try:
+                        bin_path(path=csv_file, multicast=False, savepath=None)
+                        print(f"✓ Successfully processed: {csv_file}")
+                    except Exception as e:
+                        print(f"✗ Error processing {csv_file}: {str(e)}")
+            else:
+                print(f"✗ No session*.csv files found in: {directory_path}")
         else:
-            print(f"✗ File not found: {file_path}")
-
+            print(f"✗ Directory not found or invalid: {directory_path}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process CSV files.')
