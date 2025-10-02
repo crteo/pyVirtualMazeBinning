@@ -17,25 +17,72 @@ from enum import Enum
 
 def process(readpath : str, savepath : str, colNumsEnum : Enum):
     print(f"Starting on :{readpath}, saving to {savepath}")
+        #Read Data and Masks
+    full_data, full_obj_names, fixation_mask, valid_coord_mask = \
+        reading.read_data_with_masks(readpath, colNumsEnum)
+    timestamps = full_data[:, 0]
+    hitlocs = full_data[:, 1::] # Coordinates
+    total_rows = full_data.shape[0]
+
+    # 2. Initialise an array for ABSOLUTE BINS (default to a safe value like 0)
+    abs_bin_arr = np.zeros(total_rows, dtype=int)
+    
+    # 3. Apply Special Bins for Non-Standard Data
+    
+    # Mask A: Invalid Coordinates (Bin ID -1)
+    invalid_coord_mask = ~valid_coord_mask
+    abs_bin_arr[invalid_coord_mask] = -1
+    
+    # Mask B: Valid Coordinates BUT Not Fixation End (Bin ID -2)
+    # This must exclude rows already set to -1
+    non_fixation_mask = valid_coord_mask & ~fixation_mask
+    abs_bin_arr[non_fixation_mask] = -2
+
+    # 4. Identify Data for Normal Binning
+    # Normal binning only applies to samples with valid coords AND end-of-fixation status
+    normal_bin_mask = valid_coord_mask & fixation_mask
+    
+    # Filter data and names for only the rows that need normal binning
+    normal_hitlocs = hitlocs[normal_bin_mask, :]
+    normal_obj_names = full_obj_names[normal_bin_mask]
+
+    # --- Execute Normal Binning on Filtered Subset ---
+    
+    # 5. Determine Mappers for the Normal Subset
+    mappers = get_mappers(normal_obj_names, normal_hitlocs)
+    
+    # 6. Apply Binners for the Normal Subset (Calculates relative bin)
+    rel_bin_arr_normal = apply_binners(mappers, normal_hitlocs)
+    
+    # 7. Convert to Absolute Bin for the Normal Subset
+    abs_bin_arr_normal = bin.get_abs_bin(mappers, rel_bin_arr_normal)
+
+    # 8. Insert Normal Bins back into the full array
+    abs_bin_arr[normal_bin_mask] = abs_bin_arr_normal.flatten()
+    
+    '''
     numerical_vals = reading.read_numerical_vals(readpath, colNumsEnum) #reading slow as not vectorised
     # print(numerical_vals)
     hitlocs = numerical_vals[:,1::]
     timestamps = numerical_vals[:,0]
     obj_names = reading.read_event_type(readpath, colNumsEnum) #reading slow as not vectorised
+    '''
     # print("obj names")
     # for name in obj_names :
     #     if name != "Poster" and name not in bin_consts.OBJ_TO_BINNER :
     #         print(name)
+    '''
     mappers = get_mappers(obj_names,hitlocs)
     print("Got mappers successfully")
-    # print(mappers)
+    print(mappers)
     print(np.nonzero([mappers == np.nan]))
     rel_bin_arr = apply_binners(mappers,hitlocs)
     print("Applied binners successfully")
     abs_bin_arr = bin.get_abs_bin(mappers, rel_bin_arr) # SLOW BECAUSE I HAVEN'T FIGURED OUT HOW TO VECTORISE THIS FULLY
     print("Converted relative to abs bin successfully")
+    '''
     save_arr = np.hstack((timestamps.reshape(-1,1),abs_bin_arr.reshape(-1,1)))
-    save_arr = save_arr[abs_bin_arr > 0, :]
+    #save_arr = save_arr[abs_bin_arr > 0, :]
     np.savetxt(savepath,save_arr,fmt='%d',delimiter=',')
     # with open(savepath, 'w', newline ='') as file :
     #     # writer = csv.writer(file)
