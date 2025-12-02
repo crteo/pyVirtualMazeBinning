@@ -166,7 +166,7 @@ def process_batch(batch_file_path: str):
             print(f"\n--- Searching in directory: {directory_path} ---")
             
             # Search for session*.csv files in the directory
-            csv_pattern = os.path.join(directory_path, "session*.csv")
+            csv_pattern = os.path.join(directory_path, "unityfile_eyelink_new.csv")
             csv_files = glob.glob(csv_pattern)
             
             if csv_files:
